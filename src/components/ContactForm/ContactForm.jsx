@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import shortid from 'shortid';
@@ -8,35 +8,36 @@ import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import PropTypes from 'prop-types';
 import styles from './ContactForm.module.css';
 
-export default class ContactForm extends Component {
-  state = {
-    name: '',
-    number: '',
-    isDisabled: true,
-  };
-  resetForm = () => {
-    this.setState({ name: '', number: '', id: '', isDisabled: true });
+export const ContactForm = ({ addContact, contacts }) => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  const resetForm = () => {
+    setName('');
+    setNumber('');
+    setIsDisabled(true);
   };
 
-  formSubmitHandler = e => {
+  const formSubmitHandler = e => {
     e.preventDefault();
     const contact = {
       id: shortid.generate(),
-      name: this.state.name,
-      number: this.state.number,
+      name: name,
+      number: number,
     };
-    if (this.state.number.length <= 4)
-      return Notify.failure('Enter valid number');
+    if (number.length <= 4) return Notify.failure('Enter valid number');
 
-    this.props.addContact(contact);
-    this.resetForm();
+    addContact(contact);
+    resetForm();
   };
 
-  formChangeHandler = e => {
+  const formChangeHandler = e => {
     const { name, value } = e.currentTarget;
-    this.setState({ isDisabled: false, [name]: value });
+    setName(value);
+    setIsDisabled(false);
   };
-  formCheckValueHandler = e => {
+  const formCheckValueHandler = e => {
     const { value } = e.currentTarget;
     const nameRegex =
       /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
@@ -46,59 +47,58 @@ export default class ContactForm extends Component {
       );
     }
     if (value) {
-      const contactFinder = this.props.contacts.find(
+      const contactFinder = contacts.find(
         contact =>
           contact.name.toLowerCase() ===
           value.toLowerCase().replace(/ +/g, ' ').trim()
       );
       if (contactFinder) {
-        this.setState({ isDisabled: true });
+        setIsDisabled(true);
         Notify.warning(`${value} is already in contacts.`);
       }
     }
   };
 
-  render() {
-    return (
-      <form onSubmit={this.formSubmitHandler} className={styles.form}>
-        <label>
-          Name:
-          <input
-            type="text"
-            name="name"
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-            value={this.state.name}
-            onChange={e => this.formChangeHandler(e)}
-            onBlur={e => this.formCheckValueHandler(e)}
-          />
-        </label>
+  return (
+    <form onSubmit={formSubmitHandler} className={styles.form}>
+      <label>
+        Name:
+        <input
+          type="text"
+          name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+          value={name}
+          onChange={e => formChangeHandler(e)}
+          onBlur={e => formCheckValueHandler(e)}
+        />
+      </label>
 
-        <label>
-          Number:
-          <PhoneInput
-            country={'ua'}
-            regions={'europe'}
-            inputProps={{
-              name: 'number',
-              required: true,
-              autoFocus: true,
-            }}
-            value={this.state.number}
-            onChange={number => this.setState({ number })}
-          />
-        </label>
-        <button
-          className={styles.submitButton}
-          type="submit"
-          disabled={this.state.isDisabled}
-        >
-          add contact
-        </button>
-      </form>
-    );
-  }
-}
+      <label>
+        Number:
+        <PhoneInput
+          country={'ua'}
+          regions={'europe'}
+          inputProps={{
+            name: 'number',
+            required: true,
+            autoFocus: true,
+          }}
+          value={number}
+          onChange={number => setNumber(number)}
+        />
+      </label>
+      <button
+        className={styles.submitButton}
+        type="submit"
+        disabled={isDisabled}
+      >
+        add contact
+      </button>
+    </form>
+  );
+};
+
 ContactForm.propTypes = {
   addContact: PropTypes.func,
   contacts: PropTypes.arrayOf(
