@@ -1,8 +1,8 @@
 {
-  "name": "goit-react-hw-04-phonebooks",
+  "name": "goit-react-hw-04-hooks-phonebook",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://AVerba.github.io/goit-react-hw-04-phonebook/",
+  "homepage": "https://AVerba.github.io/goit-react-hw-04-hooks-phonebook",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",

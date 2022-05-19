@@ -32,7 +32,7 @@ export const App = () => {
   }, [contacts]);
 
   const addContact = contact => {
-    setContacts(contacts => [...contacts, contact]);
+    setContacts([...contacts, contact]);
   };
 
   const filterInputHandler = e => {
