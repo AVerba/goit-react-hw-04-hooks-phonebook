@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import shortid from 'shortid';
@@ -9,13 +9,11 @@ import PropTypes from 'prop-types';
 import styles from './ContactForm.module.css';
 
 export const ContactForm = ({ addContact, contacts }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [user, setUser] = useState({ name: '', number: '' });
   const [isDisabled, setIsDisabled] = useState(true);
 
   const resetForm = () => {
-    setName('');
-    setNumber('');
+    setUser({ name: '', number: '' });
     setIsDisabled(true);
   };
 
@@ -23,21 +21,28 @@ export const ContactForm = ({ addContact, contacts }) => {
     e.preventDefault();
     const contact = {
       id: shortid.generate(),
-      name: name,
-      number: number,
+      name: user.name,
+      number: user.number,
     };
-    if (number.length <= 4) return Notify.failure('Enter valid number');
+    if (contact.number.length <= 4)
+      return Notify.failure(`Enter valid number ${contact.number}`);
 
     addContact(contact);
     resetForm();
   };
+  useEffect(() => {
+    if (user.name && user.number) setIsDisabled(false);
+  }, [user.name, user.number]);
 
-  const formChangeHandler = e => {
+  const formChangeNameHandler = e => {
     const { name, value } = e.currentTarget;
-    setName(value);
-    setIsDisabled(false);
+    setUser(user => ({ ...user, [name]: value }));
+  };
+  const formChangePhoneHandler = phone => {
+    setUser(user => ({ ...user, number: phone }));
   };
   const formCheckValueHandler = e => {
+    console.log(user);
     const { value } = e.currentTarget;
     const nameRegex =
       /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
@@ -68,8 +73,8 @@ export const ContactForm = ({ addContact, contacts }) => {
           name="name"
           pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
           title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          value={name}
-          onChange={e => formChangeHandler(e)}
+          value={user.name}
+          onChange={e => formChangeNameHandler(e)}
           onBlur={e => formCheckValueHandler(e)}
         />
       </label>
@@ -84,8 +89,8 @@ export const ContactForm = ({ addContact, contacts }) => {
             required: true,
             autoFocus: true,
           }}
-          value={number}
-          onChange={number => setNumber(number)}
+          value={user.number}
+          onChange={number => formChangePhoneHandler(number)}
         />
       </label>
       <button
